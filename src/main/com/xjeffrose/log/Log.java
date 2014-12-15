@@ -15,7 +15,7 @@ public class Log {
     logger.addHandler(handler);
   }
 
-  public static Logger create() {
+  public static Logger getLogger() {
     if (instance == null) {
       instance = new Log();
     }

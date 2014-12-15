@@ -59,4 +59,3 @@ class LogFormatter extends Formatter implements Glog.Formatter<LogRecord> {
     return record.getThrown();
   }
 }
-

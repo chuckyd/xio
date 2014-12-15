@@ -2,62 +2,46 @@ package com.xjeffrose.xio;
 
 import java.io.*;
 import java.nio.channels.*;
-import java.util.*;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.*;
 import java.util.logging.*;
 import java.util.stream.*;
-import java.util.concurrent.atomic.*;
+
+import com.xjeffrose.log.*;
 
 class EventLoop implements Closeable {
-  private static final Logger log = com.xjeffrose.log.Log.create();
+  private static final Logger log = Log.getLogger();
 
+  private final AtomicBoolean isRunning = new AtomicBoolean();
+  private final ExecutorService exs;
   private final Selector selector;
-  private final AtomicBoolean running = new AtomicBoolean(true);
 
   EventLoop() throws IOException {
+    isRunning.set(true);
     selector = Selector.open();
+    exs = Executors.newFixedThreadPool(24);
   }
 
-  void register(Event event) throws IOException {
-    event.registerWithEventLoop(this);
+  void register(ServerSocketChannel channel) throws ClosedChannelException {
+    channel.register(selector, SelectionKey.OP_ACCEPT);
   }
 
-  @Override public void close() throws IOException {
-    running.set(false);
+  void doAccept(SelectionKey key) {
+      exs.submit(new Gatekeeper(key));
+  }
+
+  @Override public void close() {
+    isRunning.set(false);
   }
 
   void run() throws IOException {
-    while (running.get()) {
+
+    while (isRunning.get()) {
       selector.select();
-      Stream<SelectionKey> keyStream = selector.selectedKeys().stream();
-
-      keyStream
-        .forEach(key -> {
-        try {
-          if (key.isAcceptable()) {
-            Acceptable attachment = (Acceptable) key.attachment();
-            attachment.doAccept();
-          }
-          if (key.isReadable()) {
-            Readable attachment = (Readable) key.attachment();
-            attachment.doRead();
-          }
-          if (key.isWritable()) {
-            Writable attachment = (Writable) key.attachment();
-            attachment.doWrite();
-          }
-
-        } catch (IOException e) {
-          e.printStackTrace();
-        }
-      });
-
-      // VERY IMPORTANT YET SUBTLE LINE OF CODE!
-      selector.selectedKeys().clear();
+      selector.selectedKeys()
+          .stream()
+          .filter(SelectionKey::isAcceptable)
+          .forEach(this::doAccept);
     }
   }
-
-  Selector getSelector() {
-    return selector;
-  }
-
 }

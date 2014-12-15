@@ -5,23 +5,23 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.logging.*;
 
-class Main {
+import com.xjeffrose.log.*;
 
-  private static final Logger log = com.xjeffrose.log.Log.create();
+class Main {
+  private static final Logger log = Log.getLogger();
 
   public static void main(String[] args) {
     log.info("Starting xio: Be well John Spartan");
-    try {
-      List<Filter> filters = new ArrayList<Filter>();
-      GateKeeper g = new GateKeeper(8080, filters);
-      EventLoop el = new EventLoop();
 
-      el.register(g);
-      el.run();
+    try {
+      Server s = new Server(8080);
+
+      s.serve();
+
     } catch (IOException e) {
-        e.printStackTrace();
+      e.printStackTrace();
+      System.exit(-1);
     }
 
   }
-
 }
