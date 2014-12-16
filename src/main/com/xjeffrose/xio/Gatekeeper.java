@@ -8,7 +8,7 @@ import java.util.logging.*;
 import com.xjeffrose.log.*;
 
 class Gatekeeper implements Runnable {
-  private static final Logger log = Log.getLogger();
+  private static final Logger log = LogUtil.config(Gatekeeper.class.getName());
 
   private final SelectionKey key;
 
@@ -24,7 +24,7 @@ class Gatekeeper implements Runnable {
       log.info("Accepted Connection from " + client);
 
     } catch (IOException e) {
-      //log.error("There was an error here with ");
+      log.info("There was an error here with ");
       key.cancel();
     }
 

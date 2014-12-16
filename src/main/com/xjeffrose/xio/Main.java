@@ -8,7 +8,7 @@ import java.util.logging.*;
 import com.xjeffrose.log.*;
 
 class Main {
-  private static final Logger log = Log.getLogger();
+  private static final Logger log = LogUtil.config(Main.class.getName());
 
   public static void main(String[] args) {
     log.info("Starting xio: Be well John Spartan");

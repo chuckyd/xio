@@ -10,7 +10,7 @@ import java.util.stream.*;
 import com.xjeffrose.log.*;
 
 class EventLoop implements Closeable {
-  private static final Logger log = Log.getLogger();
+  private static final Logger log = LogUtil.config(EventLoop.class.getName());
 
   private final AtomicBoolean isRunning = new AtomicBoolean();
   private final ExecutorService exs;
@@ -26,8 +26,13 @@ class EventLoop implements Closeable {
     channel.register(selector, SelectionKey.OP_ACCEPT);
   }
 
-  void doAccept(SelectionKey key) {
-      exs.submit(new Gatekeeper(key));
+  private SelectionKey doAccept(SelectionKey key) {
+    exs.submit(new Gatekeeper(key));
+    return key;
+  }
+
+  private void doDone(SelectionKey key) {
+    selector.selectedKeys().remove(key);
   }
 
   @Override public void close() {
@@ -35,13 +40,13 @@ class EventLoop implements Closeable {
   }
 
   void run() throws IOException {
-
     while (isRunning.get()) {
       selector.select();
       selector.selectedKeys()
           .stream()
           .filter(SelectionKey::isAcceptable)
-          .forEach(this::doAccept);
+          .map(this::doAccept)
+          .forEach(this::doDone);
     }
   }
 }

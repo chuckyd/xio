@@ -2,17 +2,14 @@ package com.xjeffrose.xio;
 
 import java.io.*;
 import java.net.*;
-//import java.nio.*;
 import java.nio.channels.*;
 import java.util.*;
-//import java.util.concurrent.*;
 import java.util.logging.*;
 
 import com.xjeffrose.log.*;
-import com.xjeffrose.jrmalloc.*;
 
 class Server {
-  private static final Logger log = Log.getLogger();
+  private static final Logger log = LogUtil.config(Server.class.getName());
 
   private final int port;
   private final InetSocketAddress addr;
@@ -27,11 +24,9 @@ class Server {
 
     ev = new EventLoop();
     engine = new CryptoEngine();
-
     addr = new InetSocketAddress(port);
     channel = ServerSocketChannel.open();
     socket = channel.socket();
-
     configureNetworking();
   }
 
