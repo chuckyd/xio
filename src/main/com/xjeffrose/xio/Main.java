@@ -1,14 +1,12 @@
 package com.xjeffrose.xio;
 
 import java.io.*;
-import java.util.*;
-import java.util.concurrent.*;
 import java.util.logging.*;
 
 import com.xjeffrose.log.*;
 
 class Main {
-  private static final Logger log = LogUtil.config(Main.class.getName());
+  private static final Logger log = Log.getLogger(Main.class.getName());
 
   public static void main(String[] args) {
     log.info("Starting xio: Be well John Spartan");

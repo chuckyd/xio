@@ -3,13 +3,13 @@ package com.xjeffrose.xio;
 import java.io.*;
 import java.net.*;
 import java.nio.channels.*;
-import java.util.*;
+/* import java.util.*; */
 import java.util.logging.*;
 
 import com.xjeffrose.log.*;
 
 class Server {
-  private static final Logger log = LogUtil.config(Server.class.getName());
+  private static final Logger log = Log.getLogger(Server.class.getName());
 
   private final int port;
   private final InetSocketAddress addr;
@@ -36,8 +36,8 @@ class Server {
     ev.register(channel);
   }
 
-  private void announce(String path, Set<String> zkHosts) {
-  }
+  /* private void announce(String path, Set<String> zkHosts) { */
+  /* } */
 
   private void addRoute(String route, Service service) {
   }
