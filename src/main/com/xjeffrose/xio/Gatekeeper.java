@@ -15,12 +15,12 @@ class Gatekeeper implements Runnable {
 
   private final AtomicBoolean isRunning = new AtomicBoolean();
   private final ByteBuffer channelBuffer = ByteBuffer.allocate(1024);
-  private final SelectionKey key;
+  private SelectionKey key;
   private SocketChannel channel;
 
-  Gatekeeper(SelectionKey key) {
-    this.key = key;
+  private final boolean ssl = false; //for debug will remove
 
+  Gatekeeper() {
     isRunning.set(true);
   }
 
@@ -28,14 +28,16 @@ class Gatekeeper implements Runnable {
     isRunning.set(false);
   }
 
-  public void accept() {
+  public void accept(SelectionKey key) {
+    this.key = key;
+
     try {
       ServerSocketChannel ssc = (ServerSocketChannel) key.channel();
       channel = ssc.accept();
 
       SocketAddress remoteAddress = channel.getRemoteAddress();
 
-      if (channel == null){
+      if (channel == null) {
         log.info("Dropping null channel " + channel + " " + key.isAcceptable());
         killClient();
       }
@@ -59,7 +61,7 @@ class Gatekeeper implements Runnable {
     }
   }
 
-  private void killClient() {
+ private void killClient() {
     try {
       channel.close();
       key.cancel();
@@ -68,9 +70,9 @@ class Gatekeeper implements Runnable {
   }
 
   @Override public void run() {
-    while (isRunning.get()) {
+    if (ssl == true) {
       Terminator terminator = new Terminator(channel);
     }
+    Session session = new Session(channel);
   }
-
 }

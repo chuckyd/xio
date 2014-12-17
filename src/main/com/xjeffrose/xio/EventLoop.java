@@ -15,6 +15,7 @@ class EventLoop implements Closeable {
   private final AtomicBoolean isRunning = new AtomicBoolean();
   private final ExecutorService exs;
   private final Selector selector;
+  private final Gatekeeper g = new Gatekeeper();
 
   EventLoop() throws IOException {
     isRunning.set(true);
@@ -27,8 +28,7 @@ class EventLoop implements Closeable {
   }
 
   private void doAccept(SelectionKey key) {
-    Gatekeeper g = new Gatekeeper(key);
-    g.accept();
+    g.accept(key);
     exs.submit(g);
   }
 
@@ -44,7 +44,6 @@ class EventLoop implements Closeable {
           .distinct()
           .filter(SelectionKey::isAcceptable)
           .forEach(this::doAccept);
-      selector.selectedKeys().clear();
     }
   }
 

@@ -15,15 +15,12 @@ class Server {
   private final InetSocketAddress addr;
   private final ServerSocket socket;
   private final ServerSocketChannel channel;
-
   private final EventLoop ev;
-  private final CryptoEngine engine;
 
   Server(int port) throws IOException {
     this.port = port;
 
     ev = new EventLoop();
-    engine = new CryptoEngine();
     addr = new InetSocketAddress(port);
     channel = ServerSocketChannel.open();
     socket = channel.socket();
