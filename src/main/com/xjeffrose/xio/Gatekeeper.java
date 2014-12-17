@@ -30,7 +30,6 @@ class Gatekeeper implements Runnable {
 
   public void accept(SelectionKey key) {
     this.key = key;
-
     try {
       ServerSocketChannel ssc = (ServerSocketChannel) key.channel();
       channel = ssc.accept();
@@ -73,6 +72,8 @@ class Gatekeeper implements Runnable {
     if (ssl == true) {
       Terminator terminator = new Terminator(channel);
     }
+
     Session session = new Session(channel);
   }
+
 }
