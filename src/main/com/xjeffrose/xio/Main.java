@@ -13,8 +13,10 @@ class Main {
 
     try {
       Server s = new Server(8080);
+      // s.addroute("/", exampleService)
 
       s.serve();
+      // Await(s.serve()); => all async and stuff
 
     } catch (IOException e) {
       e.printStackTrace();

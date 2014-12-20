@@ -14,7 +14,6 @@ class Gatekeeper implements Runnable {
   private static final Logger log = Log.getLogger(Gatekeeper.class.getName());
 
   private final AtomicBoolean isRunning = new AtomicBoolean();
-  private final ByteBuffer channelBuffer = ByteBuffer.allocate(1024);
   private SelectionKey key;
   private SocketChannel channel;
 
@@ -30,11 +29,12 @@ class Gatekeeper implements Runnable {
 
   public void accept(SelectionKey key) {
     this.key = key;
+
     try {
       ServerSocketChannel ssc = (ServerSocketChannel) key.channel();
       channel = ssc.accept();
-
       SocketAddress remoteAddress = channel.getRemoteAddress();
+      log.info("remote address: " + remoteAddress.toString());
 
       if (channel == null) {
         log.info("Dropping null channel " + channel + " " + key.isAcceptable());
@@ -58,6 +58,33 @@ class Gatekeeper implements Runnable {
       log.info("There was an error here with " + key.channel());
       key.cancel();
     }
+
+  }
+
+  public void acceptor(SelectionKey key) {
+    try {
+      ServerSocketChannel ssc = (ServerSocketChannel) key.channel();
+      channel = ssc.accept();
+      SocketAddress remoteAddress = channel.getRemoteAddress();
+      if(channel == null) {
+        log.info("Dropping null channel " + channel + " " + key.isAcceptable());
+        killClient();
+      } 
+      else log.info("Accepted Connection from " + channel);
+    } catch (IOException e) {
+    }
+  }
+
+  public void ipFilter(SelectionKey key) {
+    if(false) {
+      killClient();
+    }
+  }
+
+  public void rateLimit(SelectionKey key) {
+    if(false) {
+      killClient();
+    }
   }
 
  private void killClient() {
@@ -69,10 +96,9 @@ class Gatekeeper implements Runnable {
   }
 
   @Override public void run() {
-    if (ssl == true) {
+    if (ssl) {
       Terminator terminator = new Terminator(channel);
     }
-
     Session session = new Session(channel);
   }
 
