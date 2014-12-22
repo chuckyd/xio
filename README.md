@@ -7,6 +7,8 @@ High performance Multithreaded non-blocking Async I/O for Java 8
 
 ## Obligatory ascii art
 
+### [Depricated] -> Moving Blocking Read work to master
+
 # Gatekeeper
 
 * Network Acceptor
