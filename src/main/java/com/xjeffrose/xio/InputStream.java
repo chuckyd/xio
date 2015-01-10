@@ -19,21 +19,30 @@ class InputStream implements Runnable {
 
   private void stream() {
     nread = 1;
-    while (nread > 0) {
+    boolean delimiter_seen = false;
+    while (nread > 0 && !delimiter_seen) {
       try{
         nread = ctx.channel.read(ctx.inBuf);
-      } catch (IOException e) {}
+        String raw = new String(ctx.inBuf.array(), Charset.forName("UTF-8"));
+        if (raw.contains("\r\n\r\n")) {
+          delimiter_seen = true;
+        }
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
     }
     if (nread == -1) {
       try {
-        log.info("Closing Channel " + ctx.channel);
+        //log.info("Closing Channel " + ctx.channel);
         ctx.channel.close();
-      } catch (IOException e) {}
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
     }
   }
 
   @Override public void run() {
-    log.info("Stream Started");
+    //log.info("Stream Started");
     stream();
   }
 }

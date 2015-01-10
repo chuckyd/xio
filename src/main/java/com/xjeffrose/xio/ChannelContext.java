@@ -12,10 +12,11 @@ class ChannelContext {
   private static final Logger log = Log.getLogger(ChannelContext.class.getName());
   public final SocketChannel channel;
   public final ByteBuffer inBuf = ByteBuffer.allocate(1024);
+  public final ByteBuffer outBuf = ByteBuffer.allocate(1024);
 
   ChannelContext(SocketChannel channel) {
     this.channel = channel;
-    log.info("Channel Context Created");
+    //log.info("Channel Context Created");
   }
 
 }

@@ -3,7 +3,7 @@ package com.xjeffrose.xio;
 import java.io.*;
 import java.net.*;
 import java.nio.channels.*;
-/* import java.util.*; */
+import java.util.*;
 import java.util.logging.*;
 
 import com.xjeffrose.log.*;
@@ -40,7 +40,15 @@ class Server {
   }
 
   void serve() throws IOException {
-    ev.run();
+    Thread t = new Thread(ev, "EventLoop");
+    t.start();
+
+    Timer stats = new Timer("stats", false);
+    stats.scheduleAtFixedRate(new TimerTask() {
+      public void run() {
+        ev.stats();
+      }
+    }, 1000, 5000);
   }
 
 }

@@ -5,6 +5,7 @@ import java.net.*;
 import java.nio.*;
 import java.nio.channels.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.*;
 import java.util.logging.*;
 
 import com.xjeffrose.log.*;
@@ -13,10 +14,13 @@ class Gatekeeper implements Runnable {
   private static final Logger log = Log.getLogger(Gatekeeper.class.getName());
 
   private SelectionKey key;
-  private SocketChannel channel;
+  //private SocketChannel channel;
   private SocketAddress remoteAddress;
 
   private final boolean ssl = false; //for debug will remove
+
+  private final AtomicInteger connections_accepted = new AtomicInteger(0);
+  private final AtomicInteger connections_serviced = new AtomicInteger(0);
 
   Gatekeeper() {}
 
@@ -54,18 +58,30 @@ class Gatekeeper implements Runnable {
   /*  */
   /* } */
 
-  public void acceptor(SelectionKey key) {
+  public SocketChannel acceptor(SelectionKey key) {
     try {
       ServerSocketChannel ssc = (ServerSocketChannel) key.channel();
-      channel = ssc.accept();
-      remoteAddress = channel.getRemoteAddress();
+      SocketChannel channel = ssc.accept();
+      //remoteAddress = channel.getRemoteAddress();
       if(channel == null) {
         log.info("Dropping null channel " + channel + " " + key.isAcceptable());
         killClient();
       }
-      log.info("Accepted Connection from " + channel);
+      //log.info("Accepted Connection from " + channel);
+      int accepted = connections_accepted.incrementAndGet();
+      /*
+      if (accepted % 1000 == 0) {
+        log.info("Connections accepted: " + accepted);
+      }
+      */
+      return channel;
     } catch (IOException e) {
+      throw new RuntimeException(e);
     }
+  }
+
+  public void acceptor() {
+    int accepted = connections_accepted.incrementAndGet();
   }
 
   public void ipFilter() {
@@ -83,18 +99,41 @@ class Gatekeeper implements Runnable {
   }
 
  private void killClient() {
-    try {
-      channel.close();
       key.cancel();
+      /*
+    try {
+      //channel.close();
     } catch (IOException e) {
+      throw new RuntimeException(e);
     }
+    */
   }
 
   @Override public void run() {
+/*
     if (ssl) {
       Terminator terminator = new Terminator(channel);
     }
     Session session = new Session(channel);
+*/
+  }
+
+  public int acceptedConnections() {
+    return connections_accepted.get();
+  }
+
+  public int servicedConnections() {
+    return connections_serviced.get();
+  }
+
+  public Runnable createSession(SocketChannel channel) {
+    final Session s = new Session(channel);
+    return new Runnable() {
+      public void run() {
+        s.run();
+        int serviced = connections_serviced.incrementAndGet();
+      }
+    };
   }
 
 }
